@@ -4,7 +4,7 @@
     "type": "user-interfaces",
     "attributes": {
       "label": "Hadoop",
-      "base-url": "http://hadoop.sc1.big-data-europe.eu/",
+      "base-url": "http://namenode.ermilov.org/",
       "append-path": ""
     }
   },
@@ -13,7 +13,7 @@
     "type": "user-interfaces",
     "attributes": {
       "label": "HDFS FileBrowser",
-      "base-url": "http://hdfsfb.sc1.big-data-europe.eu/",
+      "base-url": "http://filebrowser.ermilov.org/",
       "append-path": "home"
     }
   },
@@ -22,44 +22,8 @@
     "type": "user-interfaces",
     "attributes": {
       "label": "Spark",
-      "base-url": "http://spark.sc1.big-data-europe.eu/",
+      "base-url": "http://spark.ermilov.org/",
       "append-path": ""
-    }
-  },
-  {
-    "id": 4,
-    "type": "user-interfaces",
-    "attributes": {
-      "label": "Flink",
-      "base-url": "http://flink.sc1.big-data-europe.eu/",
-      "append-path": ""
-    }
-  },
-  {
-    "id": 5,
-    "type": "user-interfaces",
-    "attributes": {
-      "label": "Solr",
-      "base-url": "http://solr.sc1.big-data-europe.eu/",
-      "append-path": ""
-    }
-  },
-  {
-    "id": 6,
-    "type": "user-interfaces",
-    "attributes": {
-      "label": "Strabon",
-      "base-url": "http://strabon.sc1.big-data-europe.eu/",
-      "append-path": "strabon/"
-    }
-  },
-  {
-    "id": 7,
-    "type": "user-interfaces",
-    "attributes": {
-      "label": "Sextant",
-      "base-url": "http://sextant.sc1.big-data-europe.eu/",
-      "append-path": "Sextant_v2.0/"
     }
   }
 ]

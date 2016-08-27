@@ -1,15 +1,25 @@
 version: '2'
 
 services:
-  nginx:
-    build: ./frontend
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
     ports:
       - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      - "constraint:public==true"
+
+  frontend:
+    build: earthquakesan/screencast-frontend:latest
+    environment:
+      - "VIRTUAL_HOST=integratedui.ermilov.org,namenode.ermilov.org,filebrowser.ermilov.org,spark.ermilov.org"
 
   namenode:
     image: bde2020/hadoop-namenode:1.0.0
     links:
-      - nginx
+      - frontend
     volumes:
       - ./data/namenode:/hadoop/dfs/name
     environment:
@@ -20,7 +30,7 @@ services:
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:1.0.0
     links:
-      - nginx
+      - frontend
       - namenode
     env_file:
       - ./hadoop.env
@@ -28,7 +38,7 @@ services:
   historyserver:
     image: bde2020/hadoop-historyserver:1.0.0
     links:
-      - nginx
+      - frontend
       - namenode
     volumes:
       - ./data/historyserver:/hadoop/yarn/timeline
@@ -38,7 +48,7 @@ services:
   nodemanager1:
     image: bde2020/hadoop-nodemanager:1.0.0
     links:
-      - nginx
+      - frontend
       - namenode
     env_file:
       - ./hadoop.env
@@ -46,7 +56,7 @@ services:
   datanode1:
     image: bde2020/hadoop-datanode:1.0.0
     links:
-      - nginx
+      - frontend
       - namenode
     volumes:
       - ./data/datanode1:/hadoop/dfs/data
@@ -60,7 +70,7 @@ services:
   hdfsfb:
     image: bde2020/hdfs-filebrowser:3.9
     links:
-      - nginx
+      - frontend
       - namenode
     environment:
       - NAMENODE_HOST=namenode
@@ -70,59 +80,25 @@ services:
   #
 
   spark-master:
-    image: bde2020/spark-master:1.5.1-hadoop2.6
+    image: bde2020/spark-master:2.0.0-hadoop2.7-hive
     links:
-      - nginx
+      - frontend
     environment:
       INIT_DAEMON_STEP: setup_spark
+    env_file:
+      - ./hadoop.env
 
   spark-worker:
-    image: bde2020/spark-worker:1.5.1-hadoop2.6
+    image: bde2020/spark-worker:2.0.0-hadoop2.7-hive
     links:
-      - nginx
+      - frontend
       - spark-master
     environment:
       - SPARK_MASTER=spark://spark-master:7077
-
-  flink-master:
-    image: bde2020/flink-master:0.10.1-hadoop2.7
-    links:
-      - nginx
-    environment:
-      - INIT_DAEMON_STEP=setup_flink
-
-  flink-worker:
-    image: bde2020/flink-worker:0.10.1-hadoop2.7
-    links:
-      - nginx
-      - flink-master
-
-  solr:
-    image: earthquakesan/solr:1.0.0-solr6.0.1
-    links:
-      - nginx
-      - zookeeper
-    environment:
-      - ZOOKEEPER_HOST=zookeeper:2181
-
-  zookeeper:
-    image: mesoscloud/zookeeper:3.4.8-centos-7
-    links:
-      - nginx
-    environment:
-      - MYID=1
-
-  strabon:
-    image: bde2020/strabon
-    links:
-      - nginx
-
-  sextant:
-    image: bde2020/sextant
-    links:
-      - nginx
+    env_file:
+      - ./hadoop.env
 
   integrator-ui:
-    build: ./integrator-ui
+    build: earthquakesan/screencast-integrator-ui:latest
     links:
-      - nginx
+      - frontend
