@@ -1,65 +1,28 @@
 version: '2'
 
 services:
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    container_name: nginx-proxy
-    ports:
-      - "80:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    environment:
-      - "constraint:public==true"
-
   frontend:
-    build: earthquakesan/screencast-frontend:latest
+    image: earthquakesan/screencast-frontend:latest
     environment:
       - "VIRTUAL_HOST=integratedui.ermilov.org,namenode.ermilov.org,filebrowser.ermilov.org,spark.ermilov.org"
 
   namenode:
     image: bde2020/hadoop-namenode:1.0.0
-    links:
-      - frontend
+    network:
+      - default
     volumes:
-      - ./data/namenode:/hadoop/dfs/name
+      - /tmp/data/namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
       - ./hadoop.env
 
-  resourcemanager:
-    image: bde2020/hadoop-resourcemanager:1.0.0
-    links:
-      - frontend
-      - namenode
-    env_file:
-      - ./hadoop.env
-
-  historyserver:
-    image: bde2020/hadoop-historyserver:1.0.0
-    links:
-      - frontend
-      - namenode
-    volumes:
-      - ./data/historyserver:/hadoop/yarn/timeline
-    env_file:
-      - ./hadoop.env
-
-  nodemanager1:
-    image: bde2020/hadoop-nodemanager:1.0.0
-    links:
-      - frontend
-      - namenode
-    env_file:
-      - ./hadoop.env
-
   datanode1:
     image: bde2020/hadoop-datanode:1.0.0
-    links:
-      - frontend
-      - namenode
+    network:
+      - default
     volumes:
-      - ./data/datanode1:/hadoop/dfs/data
+      - /tmp/data/datanode1:/hadoop/dfs/data
     env_file:
       - ./hadoop.env
 
@@ -69,9 +32,8 @@ services:
 
   hdfsfb:
     image: bde2020/hdfs-filebrowser:3.9
-    links:
-      - frontend
-      - namenode
+    network:
+      - default
     environment:
       - NAMENODE_HOST=namenode
 
@@ -81,8 +43,8 @@ services:
 
   spark-master:
     image: bde2020/spark-master:2.0.0-hadoop2.7-hive
-    links:
-      - frontend
+    network:
+      - default
     environment:
       INIT_DAEMON_STEP: setup_spark
     env_file:
@@ -90,15 +52,19 @@ services:
 
   spark-worker:
     image: bde2020/spark-worker:2.0.0-hadoop2.7-hive
-    links:
-      - frontend
-      - spark-master
+    network:
+      - default
     environment:
       - SPARK_MASTER=spark://spark-master:7077
     env_file:
       - ./hadoop.env
 
   integrator-ui:
-    build: earthquakesan/screencast-integrator-ui:latest
-    links:
-      - frontend
+    image: earthquakesan/screencast-integrator-ui:latest
+    network:
+      - default
+
+networks:
+  default:
+    external:
+      name: mynet

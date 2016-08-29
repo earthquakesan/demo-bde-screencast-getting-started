@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  frontend:
+    image: frontend
+    networks:
+      - default
+    environment:
+      - "VIRTUAL_HOST=integratedui.ermilov.org,namenode.ermilov.org,filebrowser.ermilov.org,spark.ermilov.org"
+      - "constraint:node==frontend"
+
+networks:
+  default:
+    external:
+      name: mynet

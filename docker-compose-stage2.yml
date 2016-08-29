@@ -1,0 +1,36 @@
+version: '2'
+
+services:
+  datanode1:
+    image: bde2020/hadoop-datanode:1.0.0
+    networks:
+      - default
+    volumes:
+      - /tmp/data/datanode1:/hadoop/dfs/data
+    environment:
+      - "constraint:node==frontend"
+    env_file:
+      - ./hadoop.env
+
+  spark-worker:
+    image: bde2020/spark-worker:2.0.0-hadoop2.7-hive
+    networks:
+      - default
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - "constraint:node==frontend"
+    env_file:
+      - ./hadoop.env
+
+  integrator-ui:
+    build: ./integrator-ui
+    container_name: integrator-ui
+    environment:
+      - "constraint:node==frontend"
+    networks:
+      - default
+
+networks:
+  default:
+    external:
+      name: mynet
